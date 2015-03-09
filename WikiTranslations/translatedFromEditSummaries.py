@@ -29,21 +29,21 @@ def translated_from_edit_summary(comment):
     found = False
     #text = TalkText.readline()  # if the input is in the same string
     #while ~found and text:
-    if comment is not "":
-        for to_find in reg_exp: # going over all the translated examples
-            ans = to_find.search(comment)
-            if ans is not None:
-                found = True
+    #if comment is not "":
+    for to_find in reg_exp: # going over all the translated examples
+        ans = to_find.search(comment)
+        if ans is not None:
+            found = True
+            break
+    if found: # if found then looking in it for bad words
+        phrase = ans.group(1)
+        for bad in bad_words:
+            if re.search(bad, comment) is not None:
+                found = False
                 break
-        if found: # if found then looking in it for bad words
-            phrase = ans.group(1)
-            for bad in bad_words:
-                if re.search(bad, comment) is not None:
-                    found = False
-                    break
         # if is found and doesn't include bad words then returns True
         # otherwise (not found or includes bad words) then returns False
     return found
 
-example_comment = """בלה בלה בלה תרגום"""
-print translated_from_comment(example_comment)
+#example_comment = """בלה בלה בלה תרגום"""
+#print translated_from_comment(example_comment)
