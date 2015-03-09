@@ -3,7 +3,7 @@ __author__ = 'Neta'
 
 import re
 
-def translated_from_comment(comment):
+def translated_from_edit_summary(comment):
     # The function checks in the revision comments whether there is an indication that the page was translated.
     # Input - comment text.
     # Output - a boolean indicator. True - if there is a match, False - otherwise.
