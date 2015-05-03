@@ -125,4 +125,24 @@ ON page_id = rev_page
 #ORDER BY page_len ASC
 LIMIT 100;
 
+# Hebrew-Engslih pages dictionary
+SELECT hebrew_id, hebrew_title, en.page_id as english_id, english_title
+FROM 
+    (SELECT ll_from as hebrew_id, page_title as hebrew_title, REPLACE(ll_title, ' ','_') as english_title
+     FROM hewiki_p.langlinks 
+     LEFT JOIN hewiki_p.page
+     ON page_id = ll_from
+     WHERE page_namespace = 0
+     AND ll_lang = "en" 
+     AND page_is_redirect = 0) as he
+    LEFT JOIN enwiki_p.page as en
+    ON he.english_title = en.page_title
+    WHERE en.page_namespace = 0
+;
+
+
+
+
+
+
 
