@@ -8,12 +8,9 @@ The aim of this set of scripts is take a Wikipedia language and to assess the th
 Using The Scripts
 -----------------
 The Wikipedia data that is used here is from two avilable data structures, with different design.
-1. 
-To run the MySQL Scripts, you need to work with the SQL Tables avilable through tool labs (using ssh.).
-2. 
-To run the python scripts, you first need to have python 3 (I know, it's stupid... I might transfer everything into python 3 eventually) to upload the data. The data is from the dumps. You need to download the dump...-meta-history.xml.bz2 files (the one that includes the revision text). No need to unzip it, the program iterates over the zipped file. 
-3. 
-To run the translation functions, you need to use python.
+A. To run the MySQL Scripts, you need to work with the SQL Tables avilable through tool labs (using ssh.).
+B. To run the python scripts, you first need to have python 3 (I know, it's stupid... I might transfer everything into python 3 eventually) to upload the data. The data is from the dumps. You need to download the dump...-meta-history.xml.bz2 files (the one that includes the revision text). No need to unzip it, the program iterates over the zipped file. 
+C. To run the translation functions, you need to use python.
 
 Folder List
 -----------
