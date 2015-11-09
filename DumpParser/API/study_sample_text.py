@@ -3,10 +3,12 @@ __author__ = 'Neta'
 import pywikibot
 import pickle
 
-
-# import urllib.parse
-
 def retrieve_text(file_name):
+    """  The function retrieves the text of the hebrew and english texts from Wikipedia API.
+    It uses the revision ids that in the table in input file.
+    :return: text of the revisions.
+    """
+
     # Initialization
     he_rev_id = []
     en_rev_id = []
@@ -40,6 +42,3 @@ def retrieve_text(file_name):
     output = open('en_he.pkl', 'wb')
     pickle.dump((he_rev_text, en_rev_text), output)
     output.close()
-
-
-file_name = "/Users/Neta/Documents/Wikipedia/find-wikipedia-translations/Datasets/StudySet.txt"

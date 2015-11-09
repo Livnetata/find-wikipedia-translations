@@ -3,9 +3,13 @@ __author__ = 'Neta'
 
 import re
 
-_internal_link = re.compile(u'\[\[(:?(?:[^:\]\|]+:?\s*)+?)(?:\|.*?)?\]\]')
+re_internal_link = u'\[\[(:?(?:[^:\]\|]+:?\s*)+?)(?:\|.*?)?\]\]'
+re_numbers = u'(?:[\$\- \:\]])(\d+(?:,\d+)*(?:\.\d+)?)(?:[%\.,\- ])'
+_internal_link = re.compile(re_internal_link)
+_feature = re.compile('|'.join([re_internal_link, re_numbers]))
+
 _category_link = re.compile(
-u'\[\[[category|cat]:([^:\]]*?)\]\]')  # Remember to change the word category according to the language
+    u'\[\[[category|cat]:([^:\]]*?)\]\]')  # Remember to change the word category according to the language
 _lang_link = re.compile(u'\[\[([a-z\-]+):([^:\]\{\}]*?)\]\]')
 
 _other_links = ["acronym", "advisory", "advogato", "aew", "appropedia", "aquariumwiki",
@@ -73,7 +77,8 @@ _other_links = ["acronym", "advisory", "advogato", "aew", "appropedia", "aquariu
                 "wmse", "wmsk", "wmteam", "wmtr", "wmtw", "wmua", "wmuk", "wmve", "wmza",
                 "wookieepedia", "wowwiki", "wqy", "wurmpedia", "zh-cfr", "zrhwiki", "zum", "zwiki",
                 "ĉej", "docbook", "ppr", "imdb", "shoutwiki", "sourcewatch", "tejo", "uea",
-                "webseitzwiki", "talk", "help", "extentions", "special", "user", "template", "portal",
+                "webseitzwiki", "talk", "help", "extentions", "special", "user", "template",
+                "portal",
                 "book", "draft", "mediawiki", "education program", "timedtext", "module", "topic",
                 "project", "wp", "wt", "wikipedia talk", "project talk", "file talk", "h"]
 
@@ -99,38 +104,38 @@ _lang_list = ["en", "sv", "nl", "de", "fr", "war", "ceb", "ru", "it", "es", "vi"
               "ltg", "sd", "zu", "za", "om", "chy", "tw", "rmy", "cu", "mai", "chr", "tn", "got",
               "bi", "pih", "rn", "sm", "bm", "ss", "mo", "iu", "xh", "ki", "pnt", "lg", "ts", "ee",
               "ak", "ti", "fj", "ks", "sg", "ff", "ny", "st", "ve", "cr", "dz", "ik", "tum", "ch",
-              "ng", "ii", "cho", "mh", "aa", "kj", "ho", "mus", "kr", "hz", "azb", "gon", "lrc"]
+              "ng", "ii", "cho", "mh", "aa", "kj", "ho", "mus", "kr", "hz", "azb", "gom", "lrc"]
 
-en_he_dic = {"media":"מדיה", "special": "מיוחד", "talk":"שיחה", "user":"משתמש",
-             "user_talk":"שיחת משתמש", "file":"קובץ","file_talk":"שיחת קובץ", "template":"תבנית",
-             "template_talk":"שיחת תבנית", "category":"קטגוריה", "category_talk":"שיחת קטגוריה",
-             "wikipeida":"ויקיפדיה", "wikipedia_talk":"שיחת ויקיפדיה", "help":"עזרה",
-             "help_talk":"שיחת עזרה", "help__talk":"שיחת עזרה", "Books":"ספר", "draft":"טיוטה",
-             "mediawiki":"מדיה ויקי", "mediawiki_talk":"שיחת מדיה ויקי", "image":"תמונה",
-             "portal":"פורטל"}
+en_he_dic = {"media": "מדיה", "special": "מיוחד", "talk": "שיחה", "user": "משתמש",
+             "user_talk": "שיחת משתמש", "file": "קובץ", "file_talk": "שיחת קובץ",
+             "template": "תבנית",
+             "template_talk": "שיחת תבנית", "category": "קטגוריה", "category_talk": "שיחת קטגוריה",
+             "wikipeida": "ויקיפדיה", "wikipedia_talk": "שיחת ויקיפדיה", "help": "עזרה",
+             "help_talk": "שיחת עזרה", "help__talk": "שיחת עזרה", "Books": "ספר", "draft": "טיוטה",
+             "mediawiki": "מדיה ויקי", "mediawiki_talk": "שיחת מדיה ויקי", "image": "תמונה",
+             "portal": "פורטל"}
 
 _file_media_links = ["file", "media", "image", en_he_dic.get("file", en_he_dic.get("media"))]
 
 
 def find_interlinks(text):
     """
-    The function detected interlinks in a text.
-    We are starting from the dirtiest way possible.
-    Importantly, there are many types of links that use the same markup.
-    We wish to divide them into smaller groups: interlinks (to main namespace and others),
-    langlinks, media and file, Category.
+    The function detected interlinks in a text and divides then according to type.
+    interlinks to main namespace, interlinks to others namespace or languages, language links
+    media and file, Category.
     Taking care of the regular cases:
         [[x]] -> (None, 'x')
         [[type:x]] -> ('type','x')
         [[:type:x]] -> (':type','x')
+    We are starting from the dirtiest way possible.
     :param text: String of wikitext.
-    :return: A list for each group of links by order of appearance. It saves duplicates.
+    :return: A list for each type of links by order of appearance. It saves duplicates.
     """
-    langlinks = []
-    inlinks = []
-    otherlinks = []
-    categories = []
-    medialinks = []
+    langlinks = []  # language links
+    inlinks = []  # inter links
+    otherlinks = []  # links to other wikipedias
+    categories = []  # categories
+    medialinks = []  # media links
     links = _internal_link.finditer(text)
     for link_text in links:
         link = link_text.group(1)
@@ -142,7 +147,8 @@ def find_interlinks(text):
         else:  # num_colon == 1
             colon_pos = link.find(":")
             link_type = link[:colon_pos]
-            if link_type == "category" or link_type == "cat" or link_type ==  en_he_dic.get("category"):
+            if link_type == "category" or link_type == "cat" or link_type == en_he_dic.get(
+                    "category"):
                 categories.append(link[colon_pos + 1:])
             elif link_type in _file_media_links:
                 medialinks.append(link[colon_pos + 1:])
@@ -151,7 +157,7 @@ def find_interlinks(text):
                 langlinks.append(link)
             else:
                 otherlinks.append(link)
-    return inlinks, otherlinks, langlinks, categories, medialinks
+    return (inlinks, otherlinks, langlinks, categories, medialinks)
 
 
 def find_categories(text):
@@ -181,6 +187,7 @@ def find_language_links(text):
             langlinks.append((link_type, link[colon_pos + 1:]))
     return langlinks
 
+
 def print_links(inlinks, otherlinks, langlinks, categories, medialinks, output_file):
     with open(output_file, "w") as links_output:
         links_output.write('inlinks:\n')
@@ -200,16 +207,44 @@ def print_links(inlinks, otherlinks, langlinks, categories, medialinks, output_f
             links_output.write(link + '\t')
 
 
-input_file = "/Users/Neta/Documents/Wikipedia/find-wikipedia-translations/Datasets/english_example_text"
-output_file = "/Users/Neta/Documents/Wikipedia/find-wikipedia-translations/Datasets/example_links.txt"
-
-text_file  = open(input_file, 'rb')
-text = text_file.read()
-text_file.close()
-text = text.lower()
-# text = text.decode("utf-8")
-(inlinks, otherlinks, langlinks, categories, medialinks) = find_interlinks(text)
-print_links(inlinks, otherlinks, langlinks, categories, medialinks, output_file)
+def find_gallery(text):
+    pass
 
 
+def find_features(text):
+    features = []
+    langlinks = []  # language links
+    otherlinks = []  # links to other wikipedias
+    categories = []  # categories
+    medialinks = []  # media links
 
+    for line in text.splitlines():
+        if len(line) > 2:
+            if (line[0] != "&") and (line[0] != "|") and (line[:2] != "{{") and (line[0] != "!"):
+                # finding interlinks
+                links = _feature.finditer(line)
+                for link_text in links:
+                    if link_text.group(1) is not None:
+                        link = link_text.group(1)
+                        num_colon = link.count(":")
+                        if num_colon == 0:
+                            features.append((link, "link"))
+                        elif num_colon > 1:
+                            otherlinks.append(link)
+                        else:  # num_colon == 1
+                            colon_pos = link.find(":")
+                            link_type = link[:colon_pos]
+                            if link_type == "category" or link_type == "cat" \
+                                    or link_type == en_he_dic.get("category"):
+                                categories.append(link[colon_pos + 1:])
+                            elif link_type in _file_media_links:
+                                medialinks.append(link[colon_pos + 1:])
+                            elif link_type in _lang_list:
+                                # langlinks.append((link_type, link[colon_pos + 1:]))
+                                langlinks.append(link)
+                            else:
+                                otherlinks.append(link)
+                    else:  # found a number
+                        features.append((link_text.group(2), "num"))
+
+    return (features, otherlinks, langlinks, categories, medialinks)

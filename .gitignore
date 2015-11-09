@@ -2,3 +2,11 @@
 DumpParser/API/apicache
 XMLParser
 Datasets
+user-config.py
+*.ctrl
+*.pkl
+*.pyc
+DumpParser/apicache
+WikiTranslations/apicache
+WikiTranslations/__pycache__
+download_fr.txt

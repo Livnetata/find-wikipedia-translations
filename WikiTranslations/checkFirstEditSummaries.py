@@ -21,8 +21,8 @@ def check_first_edit_summaries(pages_input):
                 count_translated += 1
                 # count_pages += 1
     pages_info.close()
-    total_pages = ((len(id_status), count_translated, count_translated / float(len(id_status)), count_not_empty,
-                    count_translated / float(count_not_empty)))
+    total_pages = ((len(id_status), count_translated, count_translated / float(len(id_status)),
+                    count_not_empty, count_translated / float(count_not_empty)))
     return (id_status, total_pages)
 
 
@@ -31,12 +31,14 @@ def write_result(output_file, pages_status, total_pages):
         pages_output.write('\t'.join(("page_id", "page_title", "translated")) + '\n')
         for page in pages_status:
             pages_output.write('\t'.join(str(s) for s in page) + '\n')
-        pages_output.write("\ntotal pages: " + str(total_pages[0]) + "\ntotal translated pages: " + str(total_pages[1]))
+        pages_output.write("\ntotal pages: " + str(total_pages[0]) + "\ntotal translated pages: "
+                           + str(total_pages[1]))
         pages_output.write("\npercentage of translated pages: " + str(total_pages[2]))
         pages_output.write("\ntotal comments that are not empty: " + str(
-            total_pages[3]) + "\ntotal translated pages from not empty comments: " + str(total_pages[4]))
+            total_pages[3]) + "\ntotal translated pages from not empty comments: "
+                           + str(total_pages[4]))
 
-    #pages_output.close()
+        # pages_output.close()
 
 
 input_file = "/Users/Neta/Documents/Wikipedia/find-wikipedia-translations/hebrew_edits.txt"

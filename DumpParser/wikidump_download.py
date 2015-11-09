@@ -38,13 +38,13 @@ def find_files_to_download(lang, wiki_link, archive_link):
                     break
     return date.group(1), pages, stubs
 
-def wiki_urls(dump_link, page_file, stub_file):
+def wiki_urls(dump_link, page_file_re, stub_file_re):
     '''
     The functions finds the last complete dump in wikidumps. When found, it extracts the url for
      the pages dump and the stub dumps form the wikidumps.
     :param dump_link: URL
-    :param page_file: Regular expression the finds the names of the pages dumps.
-    :param stub_file: Regular expression the finds the names of the stub dumps.
+    :param page_file_re: Regular expression that finds the names of the pages dumps.
+    :param stub_file_re: Regular expression that finds the names of the stub dumps.
     :return: The function returns the date of the dump and two list for the names of the pages and stub dumps.
     '''
     with urllib.request.urlopen(dump_link) as dump_response:
@@ -53,9 +53,9 @@ def wiki_urls(dump_link, page_file, stub_file):
         found_it = re.search("Dump complete", html)
         if found_it is not None:  # found the first dump that is complete.
             complete = True
-            pages = page_file.findall(html)  # finding the pages dumps
+            pages = page_file_re.findall(html)  # finding the pages dumps
             pages = list(set(pages))
-            stubs = stub_file.findall(html)  # finding the stub dumps
+            stubs = stub_file_re.findall(html)  # finding the stub dumps
             if len(stubs) > 2:
                 stubs.pop(0)
                 stubs.pop(0)
@@ -67,13 +67,13 @@ def wiki_urls(dump_link, page_file, stub_file):
         return complete, pages, stubs
 
 
-def archive_urls(dump_link, page_file, stub_file):
+def archive_urls(dump_link, page_file_re, stub_file_re):
     '''
     The functions finds the last complete dump in Wikidumps. When found, it extracts the URLs for
     the pages dump and the stub dumps form another site (Right now it is archive.org).
     :param dump_link: URL
-    :param page_file: Regular expression the finds the names of the pages dumps.
-    :param stub_file: Regular expression the finds the names of the stub dumps.
+    :param page_file_re: Regular expression the finds the names of the pages dumps.
+    :param stub_file_re: Regular expression the finds the names of the stub dumps.
     :return: The function returns the date of the dump and two list for the names of the pages and stub dumps.
 
     '''
@@ -82,9 +82,9 @@ def archive_urls(dump_link, page_file, stub_file):
             html = dump_response.read()
             html = html.decode("utf-8")
             complete = True
-            pages = page_file.findall(html)  # finding the pages dumps
+            pages = page_file_re.findall(html)  # finding the pages dumps
             pages = list(set(pages))
-            stubs = stub_file.findall(html)  # finding the stub dumps
+            stubs = stub_file_re.findall(html)  # finding the stub dumps
             if len(stubs) > 2:
                 stubs.pop(0)
                 stubs.pop(0)
@@ -99,8 +99,8 @@ def archive_urls(dump_link, page_file, stub_file):
 
 def prepare_files_to_wget(pages, stubs, link_list, output_file_name):
     """
-    The function saves in a file the full links to download, of the pages and stubs.
-    It saves it in a wget format to used in the terminal.
+    The function saves in a file and the full links to download, of the pages and stubs.
+    It saves it in a wget format to be used in the terminal.
     """
     with open(output_file_name, "w") as output_file:
         output_file.write("​#!/bin/bash\n")
